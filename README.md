@@ -13,3 +13,4 @@ This repository comprises code for classifying files as either GAP programming l
 - Check the issues section to find what to work on
 - If new ideas come up, add it to the issues section as **enhancement**
 - If any bugs are found, raise an issue
+- When working on something, generate a new branch with an appropriate name and then do PRs once finished
