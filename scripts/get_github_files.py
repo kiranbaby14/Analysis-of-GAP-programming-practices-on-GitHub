@@ -6,6 +6,13 @@ import requests
 
 
 def get_github_files(access_token, query):
+    """
+    Function to scrape files from GitHub
+
+    :param access_token: acces token of the user
+    :param query: GitHub query
+    :return: scraped files
+    """
     while True:
         try:
             g = Github(access_token)
@@ -40,7 +47,6 @@ def get_github_files(access_token, query):
             time.sleep(10)
             continue
         break
-
 
 
 def main():

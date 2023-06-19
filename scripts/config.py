@@ -2,6 +2,11 @@ import os
 
 
 def get_access_token():
+    """
+    Read the access token and return it to the calling function
+
+    :return: access token
+    """
     token_file_path = os.path.expanduser('~') + '/.github_shell_token'
     if os.path.isfile(token_file_path):
         with open(token_file_path, 'r') as token_file:
