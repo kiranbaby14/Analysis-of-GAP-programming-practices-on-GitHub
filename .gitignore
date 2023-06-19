@@ -1,0 +1,26 @@
+# Compiled Python files
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Distribution and packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+*.env
+
+# IDE-specific files
+.idea/
+.vscode/
+*.pydevproject
+
+# Miscellaneous
+*.pyc
+.DS_Store
