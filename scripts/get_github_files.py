@@ -1,9 +1,10 @@
-import requests
-import time
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from datetime import datetime
+from github import Github
+import requests
 import calendar
 import config
+import time
 
 
 def get_github_files(access_token, query):
@@ -14,6 +15,10 @@ def get_github_files(access_token, query):
     :param query: GitHub query
     :return: scraped files
     """
+
+    # Create a PyGithub instance using the access token
+    g = Github(access_token)
+
     per_page = 100  # Number of results per page
     page = 1  # starting page number
     count = 0
@@ -25,6 +30,9 @@ def get_github_files(access_token, query):
     # Convert given dates to datetime format
     current_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    # List to store repositories with matching files
+    repositories_with_files = []
 
     # Iterate over the months until end date is reached
     while current_date <= end_date:
@@ -46,6 +54,7 @@ def get_github_files(access_token, query):
                   f"created:{created_date_range}&" \
                   f"per_page={per_page}&" \
                   f"page={page}"
+
             # Header tags
             headers = {'User-Agent': 'request',
                        "Authorization": f"Bearer {access_token}"}
@@ -56,8 +65,26 @@ def get_github_files(access_token, query):
             # Process the repositories on the current page
             items = data.get("items", [])
             for item in items:
-                print(item["html_url"])
-                count += 1
+                repo_url = item["html_url"]
+                repo_name = item["full_name"]
+
+                # Get the repository object using PyGithub
+                repo = g.get_repo(repo_name)
+
+                # Get the files in the repository
+                files = repo.get_contents("")
+
+                # Check if the repository has files matching the patterns
+                matching_files = []
+                for file in files:
+                    file_name = file.name
+                    if any(pattern in file_name for pattern in (".g", ".gi", ".gd")):
+                        matching_files.append(file_name)
+
+                # Save repositories with matching files
+                if matching_files:
+                    repositories_with_files.append((repo_url, matching_files))
+                    count += 1
 
             # Check if there are more pages
             if len(items) < per_page:
@@ -76,6 +103,14 @@ def get_github_files(access_token, query):
             print("\nRate limit exceeded (Wait for a few minutes...!)\n")
             time.sleep(300)
             continue
+
+    print(f"\nTotal repositories having (.g, .gi, .gd) extensions: {count}\n")
+
+    # Print repositories with matching files
+    # for repo_url, matching_files in repositories_with_files:
+    #     print("Repository:", repo_url)
+    #     print("Matching Files:", matching_files)
+    #     print("")
 
 
 def main():
