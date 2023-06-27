@@ -3,29 +3,14 @@ from datetime import datetime
 from github import Github
 import requests
 import calendar
-import config
 import time
+import sys
 
-
-def check_matching_files(repo, directory):
-    """
-    Recursive function to check for matching files in all directories
-
-    :param repo: repository link
-    :param directory: directory path
-    :return: matching files
-    """
-    matching_files = []
-    contents = repo.get_contents(directory)
-    for content in contents:
-        if content.type == 'dir':
-            matching_files.extend(check_matching_files(repo, content.path))
-        else:
-            file_name = content.name
-            if file_name.endswith((".g", ".gi", ".gd")):
-                print(content)
-                matching_files.append(file_name)
-    return matching_files
+# append the path of the
+# parent directory
+sys.path.append("..")
+from utils.config import get_access_token
+from utils.files import check_matching_files
 
 
 def get_github_files(access_token, query):
@@ -128,7 +113,7 @@ def get_github_files(access_token, query):
 
 
 def main():
-    access_token = config.get_access_token()
+    access_token = get_access_token()
     query = "language:GAP"
     get_github_files(access_token, query)
 
