@@ -7,6 +7,27 @@ import config
 import time
 
 
+def check_matching_files(repo, directory):
+    """
+    Recursive function to check for matching files in all directories
+
+    :param repo: repository link
+    :param directory: directory path
+    :return: matching files
+    """
+    matching_files = []
+    contents = repo.get_contents(directory)
+    for content in contents:
+        if content.type == 'dir':
+            matching_files.extend(check_matching_files(repo, content.path))
+        else:
+            file_name = content.name
+            if file_name.endswith((".g", ".gi", ".gd")):
+                print(content)
+                matching_files.append(file_name)
+    return matching_files
+
+
 def get_github_files(access_token, query):
     """
     Function to scrape files from GitHub
@@ -71,15 +92,8 @@ def get_github_files(access_token, query):
                 # Get the repository object using PyGithub
                 repo = g.get_repo(repo_name)
 
-                # Get the files in the repository
-                files = repo.get_contents("")
-
-                # Check if the repository has files matching the patterns
-                matching_files = []
-                for file in files:
-                    file_name = file.name
-                    if any(pattern in file_name for pattern in (".g", ".gi", ".gd")):
-                        matching_files.append(file_name)
+                # Get the matching files in the repository
+                matching_files = check_matching_files(repo, "")
 
                 # Save repositories with matching files
                 if matching_files:
