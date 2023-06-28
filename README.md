@@ -9,6 +9,20 @@ This repository comprises code for classifying files as either GAP programming l
 - Compare the two approaches (Heuristic and ML)
 - Perform insightful analysis on the filtered code files
 
+## Getting Started
+#### Install requirements.txt
+```
+pip install -r requirements.txt
+```
+#### cd into scripts/ directory
+```
+cd scripts/
+```
+#### Run the python script you want 
+```
+python *script_name.py*
+```
+
 ## Best Practices 
 - Check the issues section to find what to work on
 - If new ideas come up, add it to the issues section as **enhancement**
