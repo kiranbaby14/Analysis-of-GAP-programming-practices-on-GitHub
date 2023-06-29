@@ -1,4 +1,4 @@
-# Classification-and-Analysis-of-GAP-Files-on-GitHub
+# Classification-and-Analysis-of-GAP-Files-on-GitHub-using-AI
 This repository comprises code for classifying files as either GAP programming language or not, using a combination of heuristics and machine learning techniques. Additionally, it facilitates conducting comprehensive analysis on the collected data, enabling insightful observations.
 
 ![dissertation](https://github.com/kiranbaby14/Analysis-of-GAP-programming-practices-on-GitHub/assets/50899339/ed49e834-c712-4800-ad36-5cc859c709c2)
