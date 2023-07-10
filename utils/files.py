@@ -1,5 +1,7 @@
+import csv
 import time
 import sys
+
 
 
 def check_matching_files(repo, directory):
@@ -38,3 +40,18 @@ def check_matching_files(repo, directory):
         time.sleep(0.1)  # for smooth visual effects of the animation
 
     return matching_files
+
+
+def save_to_csv_file(csv_file_path, fieldnames, data):
+
+    # Write the data to a CSV file
+    with open(csv_file_path, mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        
+        # Write the header row
+        writer.writeheader()
+
+        # Write the repository details
+        writer.writerows(data)
+
+    print(f"GAP files details saved to {csv_file_path}.")
