@@ -1,5 +1,8 @@
-# Analysis-of-GAP-programming-practices-on-GitHub
+# Classification-and-Analysis-of-GAP-Files-on-GitHub-using-AI
 This repository comprises code for classifying files as either GAP programming language or not, using a combination of heuristics and machine learning techniques. Additionally, it facilitates conducting comprehensive analysis on the collected data, enabling insightful observations.
+
+![dissertation](https://github.com/kiranbaby14/Analysis-of-GAP-programming-practices-on-GitHub/assets/50899339/ed49e834-c712-4800-ad36-5cc859c709c2)
+
 
 ## Functionalities to be Implemented (change this on the go)
 - Scrape code files from GitHub 
@@ -8,6 +11,20 @@ This repository comprises code for classifying files as either GAP programming l
 - Come up with an ML approach to do the above
 - Compare the two approaches (Heuristic and ML)
 - Perform insightful analysis on the filtered code files
+
+## Getting Started
+#### Install requirements.txt
+```
+pip install -r requirements.txt
+```
+#### cd into scripts/ directory
+```
+cd scripts/
+```
+#### Run the python script you want 
+```
+python *script_name.py*
+```
 
 ## Best Practices 
 - Check the issues section to find what to work on

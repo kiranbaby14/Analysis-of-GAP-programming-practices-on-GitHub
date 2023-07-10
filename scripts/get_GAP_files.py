@@ -1,5 +1,7 @@
 from github import Github
+
 import time
+import os
 import sys
 
 # append the path of the
@@ -19,16 +21,13 @@ def get_GAP_files(access_token, repo_list):
     :param repo_list: list containing repositories to be downloaded
     :return:
     """
-    
+
     # Create a PyGithub instance using the access token
     g = Github(access_token)
 
-    # Initialise csv file name
-    csv_file_path = 'gap_files_details.csv'
-    gap_files_details = []
-
-    # Initialise column names in the csv file
-    fieldnames = ['Repository Name', 'Repository URL', 'Created At', 'Updated At', 'File Name', 'File URL']
+    # Specify the output folder path
+    output_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+    os.makedirs(output_folder, exist_ok=True)  # Create the output folder if it doesn't exist
 
     # Iterate over the repositories
     for repo_path in repo_list:
@@ -50,23 +49,16 @@ def get_GAP_files(access_token, repo_list):
             # Retrieve all matching files in the repository
             matching_files = check_matching_files(repo, "")
 
-            print("Matching Files in", repo_path)
-            for file in matching_files:
-                print(file['file_name'])
-                
-                # Create a list of dictionaries with the repository and file details
-                gap_files_details.append({
-                        'Repository Name': repo_name,
-                        'Repository URL': repo_url,
-                        'Created At': repo_created_at,
-                        'Updated At': repo_updated_at,
-                        'File Name': file['file_name'],
-                        'File URL': file['file_url']
-                    })
-            print()
+            output_file = os.path.join(output_folder, "real_GAP_files.txt")
+
+            with open(output_file, 'a') as file:
+                for file_name in matching_files:
+                    file.write(file_name + "\n")
+
         except Exception as e:
-            print("Exception occurred. Wait for a few minutes...\nException details:",e)
-            time.sleep(300)
+            print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+            time.sleep(10)
+
             continue
     save_to_csv_file(csv_file_path, fieldnames, gap_files_details)
 
