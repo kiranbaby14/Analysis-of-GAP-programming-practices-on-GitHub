@@ -10,7 +10,7 @@ import sys
 # parent directory
 sys.path.append("..")
 from utils.config import get_access_token
-from utils.files import check_matching_files
+from utils.files import retrieve_matching_files
 
 
 def get_github_files(access_token, query):
@@ -78,7 +78,7 @@ def get_github_files(access_token, query):
                 repo = g.get_repo(repo_name)
 
                 # Get the matching files in the repository
-                matching_files = check_matching_files("GAP", repo, "")
+                matching_files = retrieve_matching_files("GAP", repo, "")
 
                 # Save repositories with matching files
                 if matching_files:
