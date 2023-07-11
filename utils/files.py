@@ -3,7 +3,7 @@ import time
 import sys
 
 
-def check_matching_files(language_name, repo, directory):
+def retrieve_matching_files(language_name, repo, directory):
     """
     Recursive function to check for matching files in all directories
 
@@ -23,7 +23,7 @@ def check_matching_files(language_name, repo, directory):
         processed_files += 1
 
         if content.type == 'dir':
-            matching_files.extend(check_matching_files(language_name, repo, content.path))
+            matching_files.extend(retrieve_matching_files(language_name, repo, content.path))
         else:
             file_name = content.download_url
             if file_name.endswith((".g", ".gi", ".gd")):
