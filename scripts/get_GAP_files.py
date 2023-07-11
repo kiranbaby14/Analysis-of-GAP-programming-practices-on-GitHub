@@ -8,59 +8,42 @@ import sys
 # parent directory
 sys.path.append("..")
 
-from utils.files import check_matching_files
-from utils.files import save_to_csv_file
+from utils.files import check_matching_files, save_to_csv_file
 from utils.config import get_access_token
 
 
-def get_GAP_files(access_token, repo_list):
+def get_real_prgm_lang_files(access_token, repo_dict, output_file_path):
     """
     Retrieve matching files from a list of GitHub repositories.
 
+    :param output_file_path: file path to save the retrieved files to
     :param access_token: github access token
-    :param repo_list: list containing repositories to be downloaded
+    :param repo_dict: dictionary with programming language as key and list of repositories as values
     :return:
     """
 
     # Create a PyGithub instance using the access token
     g = Github(access_token)
 
-    # Specify the output folder path
-    output_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-    os.makedirs(output_folder, exist_ok=True)  # Create the output folder if it doesn't exist
+    # iterate over the dictionary
+    for language_name, repo_list in repo_dict.items():
+        # Iterate over the repositories
+        for repo_path in repo_list:
+            try:
+                # Get the repository object using PyGithub
+                repo = g.get_repo(repo_path)
 
-    # Iterate over the repositories
-    for repo_path in repo_list:
-        # Get the repository object using PyGithub
-        try:
-            repo = g.get_repo(repo_path)
-            
-            # Extract the repository details
-            repo_name = repo.name
-            repo_url = repo.html_url
-            repo_created_at = repo.created_at
-            repo_updated_at = repo.updated_at
+                # Retrieve all matching files in the repository
+                matching_files = check_matching_files(language_name, repo, "")
+                field_names = list(matching_files[0].keys())
 
-            # Extract collaborator details
-            #collaborators = repo.get_collaborators()
-            #collaborator_usernames = [collaborator.login for collaborator in collaborators]
-            #num_collaborators = len(collaborator_usernames)
+                save_to_csv_file(output_file_path, field_names, matching_files)
 
-            # Retrieve all matching files in the repository
-            matching_files = check_matching_files(repo, "")
+            except Exception as e:
+                print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+                time.sleep(10)
 
-            output_file = os.path.join(output_folder, "real_GAP_files.txt")
-
-            with open(output_file, 'a') as file:
-                for file_name in matching_files:
-                    file.write(file_name + "\n")
-
-        except Exception as e:
-            print("\nRate limit exceeded (Wait for a few minutes...!)\n")
-            time.sleep(10)
-
-            continue
-    save_to_csv_file(csv_file_path, fieldnames, gap_files_details)
+                continue
 
 
 def main():
@@ -68,8 +51,14 @@ def main():
     access_token = get_access_token()
 
     # Specify the repository list
-    repo_list = ["gap-system/gap"]  # add more repositories to this list if needed
-    get_GAP_files(access_token, repo_list)
+    repo_dict = {"GAP": ["gap-system/gap", ], }  # add more repositories to this list of various other pgm languages
+
+    # Specify the output folder path
+    output_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+    os.makedirs(output_folder, exist_ok=True)  # Create the output folder if it doesn't exist
+    output_file_path = os.path.join(output_folder, "real_GAP_files.csv")
+
+    get_real_prgm_lang_files(access_token, repo_dict, output_file_path)
 
 
 if __name__ == "__main__":
