@@ -43,6 +43,14 @@ def retrieve_matching_files(language_name, repo, directory):
 
 
 def save_to_csv_file(csv_file_path, fieldnames, data):
+    """
+    function to save the data into a csv file
+
+    :param csv_file_path: path where the file is to be saved
+    :param fieldnames: column names
+    :param data: column values
+    :return:
+    """
     # Write the data to a CSV file
     with open(csv_file_path, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
