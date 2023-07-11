@@ -3,11 +3,11 @@ import time
 import sys
 
 
-
-def check_matching_files(repo, directory):
+def check_matching_files(language_name, repo, directory):
     """
     Recursive function to check for matching files in all directories
 
+    :param language_name: name of the programming language
     :param repo: repository link
     :param directory: directory path
     :return: matching files
@@ -23,11 +23,11 @@ def check_matching_files(repo, directory):
         processed_files += 1
 
         if content.type == 'dir':
-            matching_files.extend(check_matching_files(repo, content.path))
+            matching_files.extend(check_matching_files(language_name, repo, content.path))
         else:
             file_name = content.download_url
             if file_name.endswith((".g", ".gi", ".gd")):
-                matching_files.append(file_name)
+                matching_files.append({"Name": language_name, "URL": file_name})
 
         # Display loading animation
         loading_animation = f"Processing files: {animation_chars[processed_files % len(animation_chars)]}"
@@ -43,11 +43,10 @@ def check_matching_files(repo, directory):
 
 
 def save_to_csv_file(csv_file_path, fieldnames, data):
-
     # Write the data to a CSV file
     with open(csv_file_path, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
-        
+
         # Write the header row
         writer.writeheader()
 
