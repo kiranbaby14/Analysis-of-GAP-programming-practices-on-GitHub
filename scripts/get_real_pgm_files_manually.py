@@ -10,15 +10,15 @@ sys.path.append("..")
 
 from utils.files import retrieve_matching_files, save_to_csv_file
 from utils.config import get_access_token
+from utils.constants import LANGUAGE_DATA
 
 
-def get_real_prgm_lang_files(access_token, repo_dict, output_file_path):
+def get_real_prgm_lang_files(access_token, output_file_path):
     """
     Retrieve matching files from a list of GitHub repositories.
 
     :param output_file_path: file path to save the retrieved files to
     :param access_token: github access token
-    :param repo_dict: dictionary with programming language as key and list of repositories as values
     :return:
     """
 
@@ -26,15 +26,18 @@ def get_real_prgm_lang_files(access_token, repo_dict, output_file_path):
     g = Github(access_token)
 
     # iterate over the dictionary
-    for language_name, repo_list in repo_dict.items():
+    for language, data in LANGUAGE_DATA.items():
+        extensions = data["extensions"]
+        repositories = data["repository"]
+        
         # Iterate over the repositories
-        for repo_path in repo_list:
+        for repo_path in repositories:
             try:
                 # Get the repository object using PyGithub
                 repo = g.get_repo(repo_path)
 
                 # Retrieve all matching files in the repository
-                matching_files = retrieve_matching_files(language_name, repo, "")
+                matching_files = retrieve_matching_files(language, repo, extensions, "")
                 field_names = list(matching_files[0].keys())
 
                 save_to_csv_file(output_file_path, field_names, matching_files)
@@ -50,15 +53,13 @@ def main():
     # Get the GitHub access token
     access_token = get_access_token()
 
-    # Specify the repository list
-    repo_dict = {"GAP": ["gap-system/gap", ], }  # add more repositories to this list of various other pgm languages
-
     # Specify the output folder path
     output_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
     os.makedirs(output_folder, exist_ok=True)  # Create the output folder if it doesn't exist
-    output_file_path = os.path.join(output_folder, "real_GAP_files.csv")
+    output_file_path = os.path.join(output_folder, "data_files.csv")
 
-    get_real_prgm_lang_files(access_token, repo_dict, output_file_path)
+    get_real_prgm_lang_files(access_token, output_file_path)
+    print(f"Data saved to {output_file_path}.")
 
 
 if __name__ == "__main__":
