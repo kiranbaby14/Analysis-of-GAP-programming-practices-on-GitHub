@@ -12,7 +12,8 @@ sys.path.append("..")
 from utils.config import get_access_token
 from utils.files import retrieve_matching_files
 from utils.constants import LANGUAGE_DATA
-    
+
+
 def validate_date(date_str):
     """
     Function to validate date string
@@ -26,6 +27,7 @@ def validate_date(date_str):
         return True
     except Exception as e:
         return False
+
 
 def get_github_files(access_token, query):
     """
@@ -49,22 +51,21 @@ def get_github_files(access_token, query):
 
     # Validate dates given by the user
     if not validate_date(start_date):
-        print("Error: Invalid start date!") 
+        print("Error: Invalid start date!")
         return
-        
+
     if not validate_date(end_date):
-        print("Error: Invalid end date!") 
+        print("Error: Invalid end date!")
         return
 
     # Convert given dates to datetime format
     current_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
-    
+
     # Validate dates given by the user
     if current_date > end_date:
-        print("Error: Invalid start date and end date!") 
+        print("Error: Invalid start date and end date!")
         return
-    
 
     # List to store repositories with matching files
     repositories_with_files = []
@@ -128,7 +129,7 @@ def get_github_files(access_token, query):
             break
 
         except Exception as e:
-            print("\nRate limit exceeded (Wait for a few minutes...!)\n",e)
+            print("\nRate limit exceeded (Wait for a few minutes...!)\n", e)
             time.sleep(300)
             continue
 
