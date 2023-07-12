@@ -11,7 +11,22 @@ import sys
 sys.path.append("..")
 from utils.config import get_access_token
 from utils.files import retrieve_matching_files
+from utils.constants import LANGUAGE_DATA
 
+    
+def validate_date(date_str):
+    """
+    Function to validate date string
+
+    :param date_str: date as a string
+    :return: true if date is valid else return false
+    """
+
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+        return True
+    except Exception as e:
+        return False
 
 def get_github_files(access_token, query):
     """
@@ -33,9 +48,24 @@ def get_github_files(access_token, query):
     start_date = input("Enter start year (YYYY-MM-DD): ")
     end_date = input("Enter end year (YYYY-MM-DD): ")
 
+    # Validate dates given by the user
+    if not validate_date(start_date):
+        print("Error: Invalid start date!") 
+        return
+        
+    if not validate_date(end_date):
+        print("Error: Invalid end date!") 
+        return
+
     # Convert given dates to datetime format
     current_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    
+    # Validate dates given by the user
+    if current_date > end_date:
+        print("Error: Invalid start date and end date!") 
+        return
+    
 
     # List to store repositories with matching files
     repositories_with_files = []
@@ -78,7 +108,7 @@ def get_github_files(access_token, query):
                 repo = g.get_repo(repo_name)
 
                 # Get the matching files in the repository
-                matching_files = retrieve_matching_files("GAP", repo, "")
+                matching_files = retrieve_matching_files("GAP", repo, LANGUAGE_DATA["GAP"]["extensions"], "")
 
                 # Save repositories with matching files
                 if matching_files:
@@ -99,7 +129,7 @@ def get_github_files(access_token, query):
             break
 
         except Exception as e:
-            print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+            print("\nRate limit exceeded (Wait for a few minutes...!)\n",e)
             time.sleep(300)
             continue
 
