@@ -11,8 +11,9 @@ dist/
 build/
 *.egg-info/
 
-# Virtual environments
+# Virtual environments  (ML-GAP-Classification- custom venv)
 venv/
+ML-GAP-Classification/
 env/
 *.env
 
