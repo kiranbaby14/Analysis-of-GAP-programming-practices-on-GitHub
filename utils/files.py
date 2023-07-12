@@ -28,7 +28,7 @@ def retrieve_matching_files(language_name, repo, extensions, directory):
         else:
             file_URL = content.download_url
             if file_URL.endswith(tuple(extensions)):
-                matching_files.append({"Name": language_name, "URL": file_URL})
+                matching_files.append({"URL": file_URL, "Name": language_name})
 
         # Display loading animation
         loading_animation = f"Processing files: {animation_chars[processed_files % len(animation_chars)]}"
