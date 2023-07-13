@@ -31,8 +31,9 @@ def retrieve_matching_files(language_name, repo, extensions, directory, pipeline
 
             if file_URL.endswith(tuple(extensions)):
                 classified_language = pipeline.predict([file_URL])
-                print(classified_language, file_URL)
-                matching_files.append({"URL": file_URL, "Name": language_name})
+                if classified_language[0] == "GAP":
+                    print(classified_language, file_URL)
+                    matching_files.append({"URL": file_URL, "Name": language_name})
 
         # Display loading animation
         loading_animation = f"Processing files: {animation_chars[processed_files % len(animation_chars)]}"
