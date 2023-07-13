@@ -1,10 +1,12 @@
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from github import Github
+import pickle
 import requests
 import calendar
 import time
 import sys
+import os
 
 # append the path of the
 # parent directory
@@ -12,7 +14,10 @@ sys.path.append("..")
 from utils.config import get_access_token
 from utils.files import retrieve_matching_files
 from utils.constants import LANGUAGE_DATA
-
+from transformers.transformers import CaseFoldingTransformer, \
+    StopWordsRemovalTransformer, \
+    NumberRemovalTransformer,\
+    UrlToContentTransformer
 
 def validate_date(date_str):
     """
@@ -27,6 +32,16 @@ def validate_date(date_str):
         return True
     except Exception as e:
         return False
+
+
+def load_pipeline():
+    # Load the saved pipeline
+    clf_folder_path = os.path.join(os.path.dirname(os.getcwd()), "model")
+    clf_file_path = os.path.join(clf_folder_path, 'classifier.pkl')
+    # Load the saved pipeline
+    with open(clf_file_path, 'rb') as file:
+        loaded_pipeline = pickle.load(file)
+    return loaded_pipeline
 
 
 def get_github_files(access_token, query):
@@ -107,8 +122,10 @@ def get_github_files(access_token, query):
                 # Get the repository object using PyGithub
                 repo = g.get_repo(repo_name)
 
+                pipeline = load_pipeline()
+
                 # Get the matching files in the repository
-                matching_files = retrieve_matching_files("GAP", repo, LANGUAGE_DATA["GAP"]["extensions"], "")
+                matching_files = retrieve_matching_files("GAP", repo, LANGUAGE_DATA["GAP"]["extensions"], "", pipeline)
 
                 # Save repositories with matching files
                 if matching_files:
