@@ -1,0 +1,25 @@
+name: Issue Reference Enforcer
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  enforce-issue-reference:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check for issue reference
+        run: |
+          PR_TITLE=$(jq --raw-output .pull_request.title $GITHUB_EVENT_PATH)
+          PR_BODY=$(jq --raw-output .pull_request.body $GITHUB_EVENT_PATH)
+          PR_COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" | jq --raw-output '.[].body')
+
+          if [[ ! $PR_TITLE =~ #[0-9]+ ]] && [[ ! $PR_BODY =~ #[0-9]+ ]] && [[ ! $PR_COMMENTS =~ #[0-9]+ ]]; then
+            echo "Error: The pull request must reference an issue number in the title, body, or comments."
+            exit 1
+          fi
