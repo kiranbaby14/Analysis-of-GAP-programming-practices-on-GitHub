@@ -16,7 +16,7 @@ jobs:
         id: check_issue_mention
         run: |
           PR_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}"
-          PR_COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $PR_URL | jq --raw-output '.body')
+          PR_COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.ACCESS_TOKEN }}" $PR_URL | jq --raw-output '.body')
           ISSUE_NUMBERS=()
           while read -r -a words; do
             for word in "${words[@]}"; do
@@ -32,12 +32,12 @@ jobs:
           fi
 
           if [[ "$ISSUE_MENTIONED" == "true" ]]; then
-            echo "Performing actions for mentioned issues: $ISSUE_NUMBERS"
+            echo "Mentioned issues: $ISSUE_NUMBERS"
 
-            for issue_number in $ISSUE_NUMBERS; do
+            for issue_number in "${ISSUE_NUMBERS[@]}"; do
               # Validate each issue number
               ISSUE_URL="https://api.github.com/repos/${{ github.repository }}/issues/$issue_number"
-              ISSUE_RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $ISSUE_URL)
+              ISSUE_RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.ACCESS_TOKEN }}" $ISSUE_URL)
               if [[ $(echo "$ISSUE_RESPONSE" | jq -r '.message') != "Not Found" ]]; then
                 # Issue exists
                 echo "Issue #$issue_number exists."
@@ -49,6 +49,6 @@ jobs:
               fi
             done
           else
-            echo "Performing actions for no mentioned issue. $ISSUE_MENTIONED"
+            echo "No mentioned issues."
             exit 1
           fi
