@@ -3,10 +3,11 @@ import time
 import sys
 
 
-def retrieve_matching_files(language_name, repo, extensions, directory):
+def retrieve_matching_files(language_name, repo, extensions, directory, pipeline=None):
     """
     Recursive function to check for matching files in all directories
 
+    :param pipeline: the preprocessing and classifier pipeline
     :param language_name: name of the programming language
     :param repo: repository link
     :param extensions: extensions of the files
@@ -24,11 +25,18 @@ def retrieve_matching_files(language_name, repo, extensions, directory):
         processed_files += 1
 
         if content.type == 'dir':
-            matching_files.extend(retrieve_matching_files(language_name, repo, extensions, content.path))
+            matching_files.extend(retrieve_matching_files(language_name, repo, extensions, content.path, pipeline))
         else:
             file_URL = content.download_url
+
             if file_URL.endswith(tuple(extensions)):
-                matching_files.append({"URL": file_URL, "Name": language_name})
+                if pipeline is not None:
+                    classified_language = pipeline.predict([file_URL])
+                    if classified_language[0] == "GAP":
+                        print(classified_language, file_URL)
+                        matching_files.append({"URL": file_URL, "Name": language_name})
+                else:
+                    matching_files.append({"URL": file_URL, "Name": language_name})
 
         # Display loading animation
         loading_animation = f"Processing files: {animation_chars[processed_files % len(animation_chars)]}"
@@ -62,4 +70,3 @@ def save_to_csv_file(csv_file_path, fieldnames, data):
 
         # Append the repository details
         writer.writerows(data)
-
