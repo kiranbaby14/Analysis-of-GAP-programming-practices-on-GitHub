@@ -1,0 +1,54 @@
+name: Issue Reference Enforcer
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  enforce-issue-reference:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check for issue reference
+        id: check_issue_mention
+        run: |
+          PR_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}"
+          PR_COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.ACCESS_TOKEN }}" $PR_URL | jq --raw-output '.body')
+          ISSUE_NUMBERS=()
+          while read -r -a words; do
+            for word in "${words[@]}"; do
+              if [[ $word =~ ^#[0-9]+ ]]; then
+                ISSUE_NUMBERS+=("${word:1}")  # Remove the leading #
+              fi
+            done
+          done <<< "$PR_COMMENTS"
+          if [[ ${#ISSUE_NUMBERS[@]} -gt 0 ]]; then
+            ISSUE_MENTIONED=true
+          else
+            ISSUE_MENTIONED=false
+          fi
+
+          if [[ "$ISSUE_MENTIONED" == "true" ]]; then
+            echo "Mentioned issues: $ISSUE_NUMBERS"
+
+            for issue_number in "${ISSUE_NUMBERS[@]}"; do
+              # Validate each issue number
+              ISSUE_URL="https://api.github.com/repos/${{ github.repository }}/issues/$issue_number"
+              ISSUE_RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.ACCESS_TOKEN }}" $ISSUE_URL)
+              if [[ $(echo "$ISSUE_RESPONSE" | jq -r '.message') != "Not Found" ]]; then
+                # Issue exists
+                echo "Issue #$issue_number exists."
+              else
+                # Issue does not exist
+                echo "Issue #$issue_number does not exist."
+                # Handle the non-existing issue
+                exit 1
+              fi
+            done
+          else
+            echo "No mentioned issues."
+            exit 1
+          fi
