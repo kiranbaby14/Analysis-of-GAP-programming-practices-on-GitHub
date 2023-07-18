@@ -30,9 +30,12 @@ def retrieve_matching_files(language_name, repo, extensions, directory, pipeline
             file_URL = content.download_url
 
             if file_URL.endswith(tuple(extensions)):
-                classified_language = pipeline.predict([file_URL])
-                if classified_language[0] == "GAP":
-                    print(classified_language, file_URL)
+                if pipeline is not None:
+                    classified_language = pipeline.predict([file_URL])
+                    if classified_language[0] == "GAP":
+                        print(classified_language, file_URL)
+                        matching_files.append({"URL": file_URL, "Name": language_name})
+                else:
                     matching_files.append({"URL": file_URL, "Name": language_name})
 
         # Display loading animation
@@ -67,4 +70,3 @@ def save_to_csv_file(csv_file_path, fieldnames, data):
 
         # Append the repository details
         writer.writerows(data)
-
