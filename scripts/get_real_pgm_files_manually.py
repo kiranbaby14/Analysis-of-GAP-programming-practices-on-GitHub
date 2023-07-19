@@ -32,20 +32,21 @@ def get_real_prgm_lang_files(access_token, output_file_path):
         
         # Iterate over the repositories
         for repo_path in repositories:
-            try:
-                # Get the repository object using PyGithub
-                repo = g.get_repo(repo_path)
+            while True:
+                try:
+                    # Get the repository object using PyGithub
+                    repo = g.get_repo(repo_path)
 
-                # Retrieve all matching files in the repository
-                matching_files = retrieve_matching_files(language, repo, extensions, "")
-                field_names = list(matching_files[0].keys())
+                    # Retrieve all matching files in the repository
+                    matching_files = retrieve_matching_files(language, repo, extensions, "")
+                    field_names = list(matching_files[0].keys())
 
-                save_to_csv_file(output_file_path, field_names, matching_files)
-
-            except Exception as e:
-                print("\nRate limit exceeded (Wait for a few minutes...!)\n")
-                time.sleep(10)
-                continue
+                    save_to_csv_file(output_file_path, field_names, matching_files)
+                    break
+                except Exception as e:
+                    print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+                    time.sleep(10)
+                    continue
 
 
 def main():

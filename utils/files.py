@@ -15,7 +15,16 @@ def retrieve_matching_files(language_name, repo, extensions, directory, pipeline
     :return: matching files
     """
     matching_files = []
-    contents = repo.get_contents(directory)
+
+    while True:
+        try:
+            contents = repo.get_contents(directory)
+            break
+        except Exception as e:
+            print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+            time.sleep(10)
+            continue
+
     processed_files = 0
 
     # Define the loading animation characters
