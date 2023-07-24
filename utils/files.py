@@ -1,6 +1,7 @@
 import csv
 import time
 import sys
+import os
 
 
 def retrieve_matching_files(language_name, repo, extensions, directory, pipeline=None):
@@ -71,7 +72,7 @@ def save_to_csv_file(csv_file_path, fieldnames, data):
     :param csv_file_path: path where the file is to be saved
     :param fieldnames: column names
     :param data: column values
-    :return:
+    :return: None
     """
     # Write the data to a CSV file
     with open(csv_file_path, mode='a', newline='') as file:
@@ -83,3 +84,23 @@ def save_to_csv_file(csv_file_path, fieldnames, data):
 
         # Append the repository details
         writer.writerows(data)
+
+
+def get_unique_file_path(output_folder, base_filename):
+    """
+    Generate a unique file path that doesn't already exist in the output folder.
+
+    :param output_folder (str) - The path to the output folder where the file should be created.
+    :param base_filename (str) - The base filename without the extension.
+    :return: str - A unique file path that can be used to create a new file.
+    """
+    file_counter = 1
+    output_file_name = f"{base_filename}.csv"
+    output_file_path = os.path.join(output_folder, output_file_name)
+
+    while os.path.exists(output_file_path):
+        file_counter += 1
+        output_file_name = f"{base_filename}({file_counter}).csv"
+        output_file_path = os.path.join(output_folder, output_file_name)
+
+    return output_file_path
