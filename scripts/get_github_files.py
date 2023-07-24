@@ -16,8 +16,9 @@ from utils.files import retrieve_matching_files
 from utils.constants import LANGUAGE_DATA
 from transformers.transformers import CaseFoldingTransformer, \
     StopWordsRemovalTransformer, \
-    NumberRemovalTransformer,\
+    NumberRemovalTransformer, \
     UrlToContentTransformer
+
 
 def validate_date(date_str):
     """
@@ -82,81 +83,87 @@ def get_github_files(access_token, query):
         print("Error: Invalid start date and end date!")
         return
 
-    # List to store repositories with matching files
-    repositories_with_files = []
+    # Process the current month
+    start_month = current_date.strftime("%Y-%m-%d")
 
     # Iterate over the months until end date is reached
     while current_date <= end_date:
-        try:
-            # Process the current month
-            start_month = current_date.strftime("%Y-%m-01")
-            if current_date.strftime("%Y-%m") != end_date.strftime("%Y-%m"):
-                _, num_days = calendar.monthrange(current_date.year, current_date.month)
-                end_month = current_date.replace(day=num_days).strftime("%Y-%m-%d")
-            else:
-                # edge case for when the end date is encountered as we want to
-                # only get the files till the specified day by the user
-                # and not the whole month
-                end_month = end_date.strftime("%Y-%m-%d")
 
-            # Construct the URL with the date range
-            created_date_range = f'{start_month}..{end_month}'
-            url = f"https://api.github.com/search/repositories?q={query}+" \
-                  f"created:{created_date_range}&" \
-                  f"per_page={per_page}&" \
-                  f"page={page}"
+        if current_date.strftime("%Y-%m") != end_date.strftime("%Y-%m"):
+            _, num_days = calendar.monthrange(current_date.year, current_date.month)
+            end_month = current_date.replace(day=num_days).strftime("%Y-%m-%d")
+        else:
+            # edge case for when the end date is encountered as we want to
+            # only get the files till the specified day by the user
+            # and not the whole month
+            end_month = end_date.strftime("%Y-%m-%d")
 
-            # Header tags
-            headers = {'User-Agent': 'request',
-                       "Authorization": f"Bearer {access_token}"}
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            data = response.json()
+        # Construct the URL with the date range
+        created_date_range = f'{start_month}..{end_month}'
+        url = f"https://api.github.com/search/repositories?q={query}+" \
+              f"created:{created_date_range}&" \
+              f"per_page={per_page}&" \
+              f"page={page}"
 
-            # Process the repositories on the current page
-            items = data.get("items", [])
-            for item in items:
-                repo_url = item["html_url"]
-                repo_name = item["full_name"]
-
-                # Get the repository object using PyGithub
-                repo = g.get_repo(repo_name)
-
-                pipeline = load_pipeline()
-
-                # Get the matching files in the repository
-                matching_files = retrieve_matching_files("GAP", repo, LANGUAGE_DATA["GAP"]["extensions"], "", pipeline)
-
-                # Save repositories with matching files
-                if matching_files:
-                    repositories_with_files.append((repo_url, matching_files))
-                    count += 1
-
-            # Check if there are more pages
-            if len(items) < per_page:
-                page = 1
-                current_date += relativedelta(months=1)
+        # Header tags
+        headers = {'User-Agent': 'request',
+                   "Authorization": f"Bearer {access_token}"}
+        while True:
+            try:
+                response = requests.get(url, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                break
+            except KeyboardInterrupt:
+                print("Execution interrupted by user.")
+                break
+            except Exception as e:
+                print("\nRate limit exceeded (Wait for a few minutes...!)\n", e)
+                time.sleep(300)
                 continue
+            # write exception for when the pagination number is not valid
 
-            # Increment the page number
-            page += 1
+        # Process the repositories on the current page
+        items = data.get("items", [])
 
-        except KeyboardInterrupt:
-            print("Execution interrupted by user.")
-            break
+        for item in items:
+            repo_name = item["full_name"]
 
-        except Exception as e:
-            print("\nRate limit exceeded (Wait for a few minutes...!)\n", e)
-            time.sleep(300)
+            while True:
+                try:
+                    # Get the repository object using PyGithub
+                    repo = g.get_repo(repo_name)
+                    break
+                except KeyboardInterrupt:
+                    print("Execution interrupted by user.")
+                    break
+                except Exception as e:
+                    print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+                    time.sleep(300)
+                    continue
+
+            pipeline = load_pipeline()
+
+            # Get the matching files in the repository
+            matching_files = retrieve_matching_files("GAP", repo, LANGUAGE_DATA["GAP"]["extensions"], "", pipeline)
+
+            # Save repositories with matching files
+            if matching_files:
+                # ----------code to save repo here----------------
+                print("Real: " + repo_name + ", Date: " + start_month.strftime("%Y-%m-%d"))
+                count += 1
+
+        # Check if there are more pages
+        if len(items) < per_page:
+            page = 1
+            current_date += relativedelta(months=1)
+            start_month = current_date.strftime("%Y-%m-01")  # start-month after the first iteration starts from day 1
             continue
 
-    print(f"\nTotal repositories having (.g, .gi, .gd) extensions: {count}\n")
+        # Increment the page number
+        page += 1
 
-    # Print repositories with matching files
-    # for repo_url, matching_files in repositories_with_files:
-    #     print("Repository:", repo_url)
-    #     print("Matching Files:", matching_files)
-    #     print("")
+    print(f"\nTotal repositories having (.g, .gi, .gd) extensions: {count}\n")
 
 
 def main():
