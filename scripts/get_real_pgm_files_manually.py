@@ -8,7 +8,7 @@ import sys
 # parent directory
 sys.path.append("..")
 
-from utils.files import retrieve_matching_files, save_to_csv_file
+from utils.files import retrieve_matching_files, save_to_csv_file, get_unique_file_path
 from utils.config import get_access_token
 from utils.constants import LANGUAGE_DATA
 
@@ -29,7 +29,7 @@ def get_real_prgm_lang_files(access_token, output_file_path):
     for language, data in LANGUAGE_DATA.items():
         extensions = data["extensions"]
         repositories = data["repository"]
-        
+
         # Iterate over the repositories
         for repo_path in repositories:
             while True:
@@ -56,7 +56,9 @@ def main():
     # Specify the output folder path
     output_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
     os.makedirs(output_folder, exist_ok=True)  # Create the output folder if it doesn't exist
-    output_file_path = os.path.join(output_folder, "data_files.csv")
+
+    base_filename = "data_files"  # csv file name to be saved
+    output_file_path = get_unique_file_path(output_folder, base_filename)
 
     get_real_prgm_lang_files(access_token, output_file_path)
     print(f"Data saved to {output_file_path}.")
