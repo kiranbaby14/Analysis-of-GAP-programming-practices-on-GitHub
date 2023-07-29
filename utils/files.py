@@ -49,7 +49,7 @@ def retrieve_matching_files(language_name, repo, extensions, directory, pipeline
                     else:
                         matching_files.append({"URL": file_URL, "Name": language_name})
             except Exception:
-                print("URL: " + file_URL + ", File: " + content)
+                # print("URL: " + file_URL + ", File: " + content)
                 continue
 
         # Display loading animation

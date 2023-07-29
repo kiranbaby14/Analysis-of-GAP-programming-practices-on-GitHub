@@ -35,18 +35,46 @@ class NumberRemovalTransformer(BaseEstimator, TransformerMixin):
         return [re.sub(r'\d+', '', text) for text in X]
 
 
+def remove_non_ascii(text):
+    """
+    Remove non-ASCII characters from the given text using a regular expression.
+    """
+    cleaned_text = re.sub(r'[^\x00-\x7F]+', '', text)
+    return cleaned_text
+
+
 class UrlToContentTransformer(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
     def fit(self, X, y=None):
         return self
 
     def transform(self, X):
         transformed_X = []
         for url in X:
-            response = requests.get(url)
-            content = response.content
-            encoding = chardet.detect(content)
-            if encoding['encoding'] == "ISO-8859-1":
-                transformed_X.append(content.decode("iso-8859-1"))
-            else:
-                transformed_X.append(content.decode("utf-8"))
+            while True:
+                try:
+                    response = requests.get(url)
+                    content = response.content
+                    encoding = chardet.detect(content)
+
+                    if encoding['encoding'] == "ISO-8859-1":
+                        decoded_content = content.decode("iso-8859-1")
+                    elif encoding['encoding'] == "GB2312":
+                        decoded_content = content.decode("GB2312")
+                    else:
+                        decoded_content = content.decode("utf-8")
+
+                    # Remove non-ASCII characters from the decoded content
+                    cleaned_content = remove_non_ascii(decoded_content)
+
+                    transformed_X.append(cleaned_content)
+                    break
+                except Exception as e:
+                    print(url)
+                    decoded_content = content.decode("utf-8")
+                    cleaned_content = remove_non_ascii(decoded_content)
+                    transformed_X.append(cleaned_content)
+                    break
         return transformed_X
