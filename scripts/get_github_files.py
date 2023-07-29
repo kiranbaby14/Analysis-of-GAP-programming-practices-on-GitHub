@@ -87,7 +87,7 @@ def get_github_files(access_token, query):
     start_month = current_date.strftime("%Y-%m-%d")
 
     # Iterate over the months until end date is reached
-    while current_date <= end_date:
+    while (current_date <= end_date) or (datetime.strptime(start_month, "%Y-%m-%d") <= end_date):
 
         if current_date.strftime("%Y-%m") != end_date.strftime("%Y-%m"):
             _, num_days = calendar.monthrange(current_date.year, current_date.month)
@@ -150,7 +150,7 @@ def get_github_files(access_token, query):
             # Save repositories with matching files
             if matching_files:
                 # ----------code to save repo here----------------
-                print("Real: " + repo_name + ", Date: " + start_month.strftime("%Y-%m-%d"))
+                print("Real: " + repo_name + ", Date: " + start_month)
                 count += 1
 
         # Check if there are more pages
