@@ -251,7 +251,7 @@ def main():
     commits_details = []    
     
     # Read the URLs from the input CSV file
-    with open('../data/real_GAP_files1.csv', 'r') as csv_file:
+    with open('../data/real_GAP_files.csv', 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
             url = row['URL']  
