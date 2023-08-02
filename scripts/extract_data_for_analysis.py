@@ -327,7 +327,7 @@ def main():
     commits_details = []    
     
     # Read the URLs from the input CSV file
-    with open('../data/real_GAP_files1.csv', 'r') as csv_file:
+    with open('../data/gap_files.csv', 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
             url = row['URL']  
@@ -385,6 +385,8 @@ def main():
         writer = csv.DictWriter(csvfile, fieldnames=fields_commits)
         writer.writeheader()
         writer.writerows(commits_details)
+        
+    print("Successfully completed.")
 
 if __name__ == "__main__":
     main()
