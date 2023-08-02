@@ -12,7 +12,7 @@ import os
 # parent directory
 sys.path.append("..")
 from utils.config import get_access_token
-from utils.files import retrieve_matching_files
+from utils.files import retrieve_matching_files, save_to_csv_file, get_unique_file_path
 from utils.constants import LANGUAGE_DATA
 from transformers.transformers import CaseFoldingTransformer, \
     StopWordsRemovalTransformer, \
@@ -45,7 +45,7 @@ def load_pipeline():
     return loaded_pipeline
 
 
-def get_github_files(access_token, query):
+def get_github_files(access_token, query, output_file_path):
     """
     Function to scrape files from GitHub
 
@@ -150,8 +150,10 @@ def get_github_files(access_token, query):
             # Save repositories with matching files
             if matching_files:
                 # ----------code to save repo here----------------
-                print("Real: " + repo_name + ", Date: " + start_month)
+                print("Real: " + repo_name + ", Date: " + start_month + ",matching_files:" , matching_files)
                 count += 1
+                field_names = list(matching_files[0].keys())
+                save_to_csv_file(output_file_path, field_names, matching_files)
 
         # Check if there are more pages
         if len(items) < per_page:
@@ -168,8 +170,17 @@ def get_github_files(access_token, query):
 
 def main():
     access_token = get_access_token()
-    query = "language:GAP"
-    get_github_files(access_token, query)
+    query = "language:GAP"    
+    
+    # Specify the output folder path
+    output_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+    os.makedirs(output_folder, exist_ok=True)  # Create the output folder if it doesn't exist
+
+    base_filename = "gap_files"  # csv file name to be saved
+    output_file_path = get_unique_file_path(output_folder, base_filename)
+
+    get_github_files(access_token, query, output_file_path)
+    print(f"Classified data saved to {output_file_path}.")
 
 
 if __name__ == "__main__":
