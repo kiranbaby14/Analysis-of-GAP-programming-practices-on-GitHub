@@ -12,7 +12,6 @@ import sys
 sys.path.append("..")
 
 from utils.config import get_access_token
-from utils.constants import COUNTRIES_NAMES_SHORTCUTS
 import re
 
 
@@ -117,42 +116,42 @@ def fetch_activity_data(repo_full_name, access_token):
         access_token (str): The personal access token used for authentication with the GitHub API.
 
     Returns:
-        list of dicts: A list containing commit details including the month, repository name, owner, commits per month,
-        issues per month, and pull requests per month.
+        list of dicts: A list containing commit details including the year, repository name, owner, commits per year,
+        issues per year, and pull requests per year.
     """
 
 
-    # Fetch activity data for commits, issues, and pull requests per month
-    commits_per_month = fetch_activity_per_month(repo_full_name, access_token, 'commits')
-    issues_per_month = fetch_activity_per_month(repo_full_name, access_token, 'issues')
-    pull_requests_per_month = fetch_activity_per_month(repo_full_name, access_token, 'pulls')
+    # Fetch activity data for commits, issues, and pull requests per year
+    commits_per_year = fetch_activity_per_year(repo_full_name, access_token, 'commits')
+    issues_per_year = fetch_activity_per_year(repo_full_name, access_token, 'issues')
+    pull_requests_per_year = fetch_activity_per_year(repo_full_name, access_token, 'pulls')
 
-    # Combine all unique dates (months) from commits, issues, and pull requests
-    all_dates = set(list(commits_per_month.keys()) + list(issues_per_month.keys()) + list(pull_requests_per_month.keys()))
+    # Combine all unique dates (years) from commits, issues, and pull requests
+    all_dates = set(list(commits_per_year.keys()) + list(issues_per_year.keys()) + list(pull_requests_per_year.keys()))
 
-    # Sort the dates in ascending order (by year and month)
-    sorted_dates = sorted(all_dates, key=lambda x: datetime.strptime(x, '%Y-%m'))
+    # Sort the dates in ascending order (by year)
+    sorted_dates = sorted(all_dates, key=lambda x: datetime.strptime(x, '%Y'))
 
-    # Prepare a list of dictionaries containing commits, issues, and pull requests count for each month
+    # Prepare a list of dictionaries containing commits, issues, and pull requests count for each year
     commits_info = []
     for date in sorted_dates:
-        commits_count = commits_per_month.get(date, 0)
-        issues_count = issues_per_month.get(date, 0)
-        pull_requests_count = pull_requests_per_month.get(date, 0)
+        commits_count = commits_per_year.get(date, 0)
+        issues_count = issues_per_year.get(date, 0)
+        pull_requests_count = pull_requests_per_year.get(date, 0)
         commits_info.append({
-            'Month': date,
+            'Year': date,
             'Repository': repo_full_name,
-            'Commits Per Month': commits_count,
-            'Issues Per Month': issues_count,
-            'Pull Requests Per Month': pull_requests_count
+            'Commits Per Year': commits_count,
+            'Issues Per Year': issues_count,
+            'Pull Requests Per Year': pull_requests_count
         })
 
-    # Return the list of dictionaries containing commits, issues, and pull requests count for each month
+    # Return the list of dictionaries containing commits, issues, and pull requests count for each year
     return commits_info
 
-def fetch_activity_per_month(repo_full_name, access_token, activity_type):
+def fetch_activity_per_year(repo_full_name, access_token, activity_type):
     """
-    Fetches activity data per month for a specific type (e.g., commits, issues, or pull requests) in a GitHub repository.
+    Fetches activity data per year for a specific type (e.g., commits, issues, or pull requests) in a GitHub repository.
 
     Parameters:
         repo_full_name (str): The full name of the repository in the format 'owner/repository_name'.
@@ -160,8 +159,8 @@ def fetch_activity_per_month(repo_full_name, access_token, activity_type):
         activity_type (str): The type of activity to fetch (e.g., 'commits', 'issues', 'pulls').
 
     Returns:
-        dict: A dictionary containing activity data per month where the keys are the months in the format 'YYYY-MM'
-              and the values are the count of activities in that month.
+        dict: A dictionary containing activity data per year where the keys are the years in the format 'YYYY'
+              and the values are the count of activities in that year.
 
     Raises:
         None.
@@ -175,18 +174,18 @@ def fetch_activity_per_month(repo_full_name, access_token, activity_type):
     if response.status_code == 200:
         # Extract activity data from the response JSON
         activity_data = response.json()
-        activity_per_month = {}
+        activity_per_year = {}
 
-        # Process activity data to calculate count of activities per month
+        # Process activity data to calculate count of activities per year
         for activity in activity_data:
             if activity_type == 'commits':
-                created_at = activity['commit']['committer']['date'][:7]  # Extract year and month (YYYY-MM)
+                created_at = activity['commit']['committer']['date'][:4]  # Extract year and year (YYYY)
             else:
-                created_at = activity['created_at'][:7]  # Extract year and month (YYYY-MM)
-            activity_per_month[created_at] = activity_per_month.get(created_at, 0) + 1
+                created_at = activity['created_at'][:4]  # Extract year and year (YYYY)
+            activity_per_year[created_at] = activity_per_year.get(created_at, 0) + 1
 
-        # Return the activity data per month as a dictionary
-        return activity_per_month
+        # Return the activity data per year as a dictionary
+        return activity_per_year
 
     # If the request is not successful, return an empty dictionary
     return {}
@@ -251,7 +250,7 @@ def main():
     commits_details = []    
     
     # Read the URLs from the input CSV file
-    with open('../data/real_GAP_files.csv', 'r') as csv_file:
+    with open('../data/data_files.csv', 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
             url = row['URL']  
@@ -280,9 +279,7 @@ def main():
                     repository_details.append({
                         'Repository': repository_path,
                         'Created Date': repo_created_at,
-                        'Number of Contributors': num_contributors,
-                        'Repository Owner': repo_owner,
-                        'Owner Location': owner_location
+                        'Number of Contributors': num_contributors
                     })
 
                     # Extend the user_details list with contributors' data
@@ -292,7 +289,7 @@ def main():
                     commits_details.extend(commits_info)
 
     # Save the repository details to a CSV file
-    fields_repo = ['Repository', 'Created Date', 'Number of Contributors', 'Repository Owner', 'Owner Location']
+    fields_repo = ['Repository', 'Created Date', 'Number of Contributors']
     with open('../data/repository_details.csv', 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fields_repo)
         writer.writeheader()
@@ -306,7 +303,7 @@ def main():
         writer.writerows(user_details)
 
     # Save commit details to a CSV file
-    fields_commits = ['Month', 'Repository', 'Owner', 'Commits Per Month', 'Issues Per Month', 'Pull Requests Per Month']
+    fields_commits = ['Year', 'Repository', 'Commits Per Year', 'Issues Per Year', 'Pull Requests Per Year']
     with open('../data/repository_activity.csv', 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fields_commits)
         writer.writeheader()
