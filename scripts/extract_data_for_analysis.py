@@ -12,6 +12,7 @@ import sys
 sys.path.append("..")
 
 from utils.config import get_access_token
+from utils.constants import HTTP_STATUS_CODES
 import re
 
 
@@ -34,33 +35,52 @@ def get_user_location(username, access_token):
     url = f'https://api.github.com/users/{username}'
     headers = {'Authorization': f'token {access_token}'}
 
-    # Send a GET request to the GitHub API to get user details
-    response = requests.get(url, headers=headers)
+    while True:
+        try:
+            # Send a GET request to the GitHub API to get user details
+            response = requests.get(url, headers=headers)
 
-    if response.status_code == 200:
-        # Parse the JSON response to get user details
-        user_details = response.json()
-        # Get the location field from user details
-        user_location = user_details.get('location', None)
-        location = user_details.get('location', None)
-        
-        if user_location:
-            # Clean the user_location by removing leading and trailing whitespace
-            user_location = user_location.strip()
+            if response.status_code == HTTP_STATUS_CODES["SUCCESS"]:
+                # Parse the JSON response to get user details
+                user_details = response.json()
+                # Get the location field from user details
+                user_location = user_details.get('location', None)
+                location = user_details.get('location', None)
+                
+                if user_location:
+                    # Clean the user_location by removing leading and trailing whitespace
+                    user_location = user_location.strip()
 
-            # Use Nominatim from geopy to geocode the location string and get detailed information
-            geolocator = Nominatim(user_agent="getCountry")
-            location_info = geolocator.geocode(location, exactly_one=True, language="en")
+                    # Use Nominatim from geopy to geocode the location string and get detailed information
+                    geolocator = Nominatim(user_agent="getCountry")
+                    location_info = geolocator.geocode(location, exactly_one=True, language="en")
 
-            if location_info:
-                # Extract the country name from the geocoded information and return it
-                return location_info.address.split(',')[-1].strip()
-            else:
-                # Return None if the location is not found by the geocoder
+                    if location_info:
+                        # Extract the country name from the geocoded information and return it
+                        return location_info.address.split(',')[-1].strip()
+                    else:
+                        # Return None if the location is not found by the geocoder
+                        return None
+                
+                # Return None if the user_location is not available
                 return None
-        
-        # Return None if the user_location is not available
-        return None
+                
+            elif response.status_code in [HTTP_STATUS_CODES["FORBIDDEN"], HTTP_STATUS_CODES["TOO_MANY_REQUESTS"]]:
+                print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+                time.sleep(300)  # Wait for 5 minutes (300 seconds)
+                continue  # Retry the API request
+
+            else:
+                # Handle other status codes or errors as needed
+                print(f"Unexpected status code: {response.status_code}")
+                break  # Break out of the loop if unexpected status code
+                    
+        except KeyboardInterrupt:
+            print("Execution interrupted by user.")
+            break
+        except Exception as e:
+            print("\nException Occurred!\n", e)
+            break
 
     # Return None if the API request fails
     return None
@@ -80,29 +100,48 @@ def fetch_contributors_data(repo_full_name, access_token, username_set):
     contributors_url = f'https://api.github.com/repos/{repo_full_name}/contributors'
     headers = {'Authorization': f'token {access_token}'}
 
-    # Send HTTP GET request to fetch contributors data for the repository
-    response = requests.get(contributors_url, headers=headers)
+    while True:
+        try:
+            # Send HTTP GET request to fetch contributors data for the repository
+            response = requests.get(contributors_url, headers=headers)
 
-    if response.status_code == 200:
-        # Extract contributors data from the response JSON
-        contributors = response.json()
-        contributors_data = []
+            if response.status_code == HTTP_STATUS_CODES["SUCCESS"]:
+                # Extract contributors data from the response JSON
+                contributors = response.json()
+                contributors_data = []
 
-        # Process contributors data to retrieve usernames and countries
-        for contributor in contributors:
-            login = contributor['login']
-            if login not in username_set:
-                # Add the username to the set to avoid duplicates
-                username_set.add(login)
+                # Process contributors data to retrieve usernames and countries
+                for contributor in contributors:
+                    login = contributor['login']
+                    if login not in username_set:
+                        # Add the username to the set to avoid duplicates
+                        username_set.add(login)
 
-                # Get the country of the contributor using 'get_user_location' function
-                country = get_user_location(login, access_token)
+                        # Get the country of the contributor using 'get_user_location' function
+                        country = get_user_location(login, access_token)
 
-                # Append the contributor's data (username and country) to the list
-                contributors_data.append({'User': login, 'Country': country})
+                        # Append the contributor's data (username and country) to the list
+                        contributors_data.append({'User': login, 'Country': country})
 
-        # Return the list of dictionaries containing contributors' data
-        return contributors_data
+                # Return the list of dictionaries containing contributors' data
+                return contributors_data
+                
+            elif response.status_code in [HTTP_STATUS_CODES["FORBIDDEN"], HTTP_STATUS_CODES["TOO_MANY_REQUESTS"]]:
+                print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+                time.sleep(300)  # Wait for 5 minutes (300 seconds)
+                continue  # Retry the API request
+
+            else:
+                # Handle other status codes or errors as needed
+                print(f"Unexpected status code: {response.status_code}")
+                break  # Break out of the loop if unexpected status code
+                
+        except KeyboardInterrupt:
+            print("Execution interrupted by user.")
+            break
+        except Exception as e:
+            print("\nException Occurred!\n", e)
+            break
 
     # If the request is not successful, return an empty list
     return []
@@ -168,24 +207,43 @@ def fetch_activity_per_year(repo_full_name, access_token, activity_type):
     url = f'https://api.github.com/repos/{repo_full_name}/{activity_type}'
     headers = {'Authorization': f'token {access_token}'}
 
-    # Send HTTP GET request to fetch activity data for the specified type
-    response = requests.get(url, headers=headers, params={'state': 'all'})
+    while True:
+        try:
+            # Send HTTP GET request to fetch activity data for the specified type
+            response = requests.get(url, headers=headers, params={'state': 'all'})
+            
+            if response.status_code == HTTP_STATUS_CODES["SUCCESS"]:
+                # Extract activity data from the response JSON
+                activity_data = response.json()
+                activity_per_year = {}
 
-    if response.status_code == 200:
-        # Extract activity data from the response JSON
-        activity_data = response.json()
-        activity_per_year = {}
+                # Process activity data to calculate count of activities per year
+                for activity in activity_data:
+                    if activity_type == 'commits':
+                        created_at = activity['commit']['committer']['date'][:4]  # Extract year and year (YYYY)
+                    else:
+                        created_at = activity['created_at'][:4]  # Extract year and year (YYYY)
+                    activity_per_year[created_at] = activity_per_year.get(created_at, 0) + 1
 
-        # Process activity data to calculate count of activities per year
-        for activity in activity_data:
-            if activity_type == 'commits':
-                created_at = activity['commit']['committer']['date'][:4]  # Extract year and year (YYYY)
+                # Return the activity data per year as a dictionary
+                return activity_per_year
+                
+            elif response.status_code in [HTTP_STATUS_CODES["FORBIDDEN"], HTTP_STATUS_CODES["TOO_MANY_REQUESTS"]]:
+                print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+                time.sleep(300)  # Wait for 5 minutes (300 seconds)
+                continue  # Retry the API request
+
             else:
-                created_at = activity['created_at'][:4]  # Extract year and year (YYYY)
-            activity_per_year[created_at] = activity_per_year.get(created_at, 0) + 1
-
-        # Return the activity data per year as a dictionary
-        return activity_per_year
+                # Handle other status codes or errors as needed
+                print(f"Unexpected status code: {response.status_code}")
+                break  # Break out of the loop if unexpected status code
+                
+        except KeyboardInterrupt:
+            print("Execution interrupted by user.")
+            break
+        except Exception as e:
+            print("\nException Occurred!\n", e)
+            break
 
     # If the request is not successful, return an empty dictionary
     return {}
@@ -210,25 +268,44 @@ def get_repository_details(repo_full_name, access_token):
     url = f'https://api.github.com/repos/{repo_full_name}'
     headers = {'Authorization': f'token {access_token}'}
 
-    # Send HTTP GET request to fetch the repository details
-    response = requests.get(url, headers=headers)
-    contributors_data = []
-    commits_info = []
+    while True:
+        try:
+            # Send HTTP GET request to fetch the repository details
+            response = requests.get(url, headers=headers)
+            contributors_data = []
+            commits_info = []
 
-    if response.status_code == 200:
-        # Extract repository details from the response JSON
-        repo_details = response.json()
-        repo_created_at = repo_details['created_at']
-        repo_owner = repo_details['owner']['login']
+            if response.status_code == HTTP_STATUS_CODES["SUCCESS"]:
+                # Extract repository details from the response JSON
+                repo_details = response.json()
+                repo_created_at = repo_details['created_at']
+                repo_owner = repo_details['owner']['login']
 
-        # Get the number of contributors and their locations
-        contributors_data = fetch_contributors_data(repo_full_name, access_token, username_set)
-        
-        # Get commit details
-        commits_info = fetch_activity_data(repo_full_name, access_token)
+                # Get the number of contributors and their locations
+                contributors_data = fetch_contributors_data(repo_full_name, access_token, username_set)
+                
+                # Get commit details
+                commits_info = fetch_activity_data(repo_full_name, access_token)
 
-        # Return the repository details as a tuple
-        return repo_created_at, len(contributors_data), repo_owner, contributors_data, commits_info
+                # Return the repository details as a tuple
+                return repo_created_at, len(contributors_data), repo_owner, contributors_data, commits_info
+                
+            elif response.status_code in [HTTP_STATUS_CODES["FORBIDDEN"], HTTP_STATUS_CODES["TOO_MANY_REQUESTS"]]:
+                print("\nRate limit exceeded (Wait for a few minutes...!)\n")
+                time.sleep(300)  # Wait for 5 minutes (300 seconds)
+                continue  # Retry the API request
+
+            else:
+                # Handle other status codes or errors as needed
+                print(f"Unexpected status code: {response.status_code}")
+                break  # Break out of the loop if unexpected status code
+                
+        except KeyboardInterrupt:
+            print("Execution interrupted by user.")
+            break
+        except Exception as e:
+            print("\nException Occurred!\n", e)
+            break
 
     # If the request is not successful, return None values
     return None, None, None, [], [] 
@@ -250,7 +327,7 @@ def main():
     commits_details = []    
     
     # Read the URLs from the input CSV file
-    with open('../data/data_files.csv', 'r') as csv_file:
+    with open('../data/real_GAP_files1.csv', 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
             url = row['URL']  
