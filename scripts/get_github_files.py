@@ -7,6 +7,7 @@ import calendar
 import time
 import sys
 import os
+import csv
 
 # append the path of the
 # parent directory
@@ -60,7 +61,8 @@ def get_github_files(access_token, query, output_file_path):
     per_page = 100  # Number of results per page
     page = 1  # starting page number
     count = 0
-
+    
+    
     # Get the start and end dates from the user (YYYY-MM-DD)
     start_date = input("Enter start year (YYYY-MM-DD): ")
     end_date = input("Enter end year (YYYY-MM-DD): ")
@@ -82,6 +84,12 @@ def get_github_files(access_token, query, output_file_path):
     if current_date > end_date:
         print("Error: Invalid start date and end date!")
         return
+        
+    date_range_of_data_collected = {
+        "start_date": start_date,
+        "end_date": datetime.strftime(end_date, "%Y-%m-%d"),
+        "current_date": datetime.now().strftime("%Y-%m-%d")
+    }
 
     # Process the current month
     start_month = current_date.strftime("%Y-%m-%d")
@@ -150,7 +158,7 @@ def get_github_files(access_token, query, output_file_path):
             # Save repositories with matching files
             if matching_files:
                 # ----------code to save repo here----------------
-                print("Real: " + repo_name + ", Date: " + start_month + ",matching_files:" , matching_files)
+                print("Real: " + repo_name + ", Date: " + start_month)
                 count += 1
                 field_names = list(matching_files[0].keys())
                 save_to_csv_file(output_file_path, field_names, matching_files)
@@ -166,6 +174,7 @@ def get_github_files(access_token, query, output_file_path):
         page += 1
 
     print(f"\nTotal repositories having (.g, .gi, .gd) extensions: {count}\n")
+    return date_range_of_data_collected
 
 
 def main():
@@ -179,8 +188,33 @@ def main():
     base_filename = "gap_files"  # csv file name to be saved
     output_file_path = get_unique_file_path(output_folder, base_filename)
 
-    get_github_files(access_token, query, output_file_path)
+    date_range_of_data_collected = get_github_files(access_token, query, output_file_path)
+    
+    date_column_names = ['start_date', 'end_date', 'current_date']
+    date_values_for_first_row = [date_range_of_data_collected['start_date'], date_range_of_data_collected['end_date'], date_range_of_data_collected['current_date']]
+
+    # Read the existing content
+    existing_content = []
+    with open(output_file_path, 'r') as csv_in:
+        reader = csv.reader(csv_in)
+        existing_content = list(reader)
+
+    # Modify the header
+    header = existing_content[0]
+    header.extend(date_column_names)
+
+    # Modify the first row
+    first_row = existing_content[1]
+    first_row.extend(date_values_for_first_row)
+
+    # Write the updated content back to the file
+    with open(output_file_path, 'w', newline='') as csv_out:
+        writer = csv.writer(csv_out)
+        writer.writerows(existing_content)
+    
     print(f"Classified data saved to {output_file_path}.")
+    
+    
 
 
 if __name__ == "__main__":

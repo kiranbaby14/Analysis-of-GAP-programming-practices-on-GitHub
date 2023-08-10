@@ -1,5 +1,6 @@
 import csv
 import time
+import pickle
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -13,6 +14,8 @@ sys.path.append("..")
 
 from utils.config import get_access_token
 from utils.constants import HTTP_STATUS_CODES
+from utils.constants import US_COUNTY_CODES
+from utils.constants import US_COUNTRY_NAME
 import re
 
 
@@ -47,9 +50,20 @@ def get_user_location(username, access_token):
                 user_location = user_details.get('location', None)
                 location = user_details.get('location', None)
                 
-                if user_location:
+                if user_location:                
                     # Clean the user_location by removing leading and trailing whitespace
                     user_location = user_location.strip()
+                    # Check if the user_location matches a valid US Two-Letter State Abbreviation
+                    for county_shortcut, county_name in US_COUNTY_CODES.items():
+                        if user_location.upper() == county_shortcut.upper():
+                            return US_COUNTRY_NAME
+
+                    # Check if the user_location appears as a whole word (not as part of other words)
+                    for county_shortcut, county_name in US_COUNTY_CODES.items():                        
+                        pattern = r"(\s|,|^)" + county_shortcut + r"(,|\s|$)"
+                        if re.search(pattern, user_location, re.IGNORECASE):
+                            return US_COUNTRY_NAME
+                    
 
                     # Use Nominatim from geopy to geocode the location string and get detailed information
                     geolocator = Nominatim(user_agent="getCountry")
@@ -318,16 +332,43 @@ def main():
     
     # Get the GitHub access token
     access_token = get_access_token()  # Function call to get the GitHub access token
+    data_file_path = '../data/real_GAP_files1.csv'
 
     # List to store repository details
     repository_details = []
     user_details = []
+    start_date = ''
+    end_date = ''
+    current_date = ''
     
     # List to store commit details
     commits_details = []    
     
+    with open(data_file_path, 'r') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        
+        # Read the first row for dates
+        first_row = next(csv_reader, None)
+        
+        if first_row is not None:
+            start_date = first_row.get('start_date')
+            end_date = first_row.get('end_date')
+            current_date = first_row.get('current_date')
+            
+    # Save the dates to a pickle file
+    output_file_path = '../data/dates.pkl'
+
+    dates_data = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "current_date": current_date
+    }
+
+    with open(output_file_path, 'wb') as output_file:
+        pickle.dump(dates_data, output_file)
+    
     # Read the URLs from the input CSV file
-    with open('../data/gap_files.csv', 'r') as csv_file:
+    with open(data_file_path, 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
             url = row['URL']  
