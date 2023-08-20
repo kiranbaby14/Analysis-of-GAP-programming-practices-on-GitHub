@@ -1,5 +1,5 @@
 # Classification-and-Analysis-of-GAP-Files-on-GitHub-using-AI
-This repository comprises code for classifying files as either GAP programming language or not, using a combination of heuristics and machine learning techniques. Additionally, it facilitates conducting comprehensive analysis on the collected data, enabling insightful observations.
+This repository comprises code for identifying repositories that uses GAP programming language, using a combination of machine learning, NLP and deep learning techniques. Additionally, it facilitates conducting comprehensive analysis on the collected data, enabling insightful observations.
 
 ![dissertation](https://github.com/kiranbaby14/Analysis-of-GAP-programming-practices-on-GitHub/assets/50899339/ed49e834-c712-4800-ad36-5cc859c709c2)
 
@@ -7,9 +7,9 @@ This repository comprises code for classifying files as either GAP programming l
 ## Functionalities to be Implemented (change this on the go)
 - Scrape code files from GitHub 
 - Preprocess the data for carrying out various techniques on them
-- Come up with a heuristic approach to distinguish whether a file belongs to GAP programming language
-- Come up with an ML approach to do the above
-- Compare the two approaches (Heuristic and ML)
+- Come up with an ML approach to do distinguish whether a file belongs to GAP programming language
+- Experiment with different models using ML, NLP and Deep Learning techniques
+- Compare the performance of the models
 - Perform insightful analysis on the filtered code files
 
 ## Getting Started
