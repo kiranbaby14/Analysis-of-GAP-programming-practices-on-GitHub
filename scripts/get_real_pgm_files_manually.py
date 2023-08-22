@@ -35,6 +35,10 @@ def get_real_prgm_lang_files(access_token, output_file_path):
             while True:
                 try:
                     # Get the repository object using PyGithub
+<<<<<<< HEAD
+=======
+                    # print(g.get_rate_limit().core)
+>>>>>>> feature/Deep-Learning
                     repo = g.get_repo(repo_path)
 
                     # Retrieve all matching files in the repository
