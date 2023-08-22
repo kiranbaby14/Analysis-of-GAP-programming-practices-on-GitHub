@@ -15,10 +15,12 @@ sys.path.append("..")
 from utils.config import get_access_token
 from utils.files import retrieve_matching_files, save_to_csv_file, get_unique_file_path
 from utils.constants import LANGUAGE_DATA
-from transformers.transformers import CaseFoldingTransformer, \
-    StopWordsRemovalTransformer, \
+from transformers.transformers import \
     NumberRemovalTransformer, \
-    UrlToContentTransformer
+    UrlToContentTransformer, \
+    NonASCIIRemovalTransformer, \
+    MultipleSpacesRemovalTransformer
+
 
 
 def validate_date(date_str):
@@ -39,7 +41,7 @@ def validate_date(date_str):
 def load_pipeline():
     # Load the saved pipeline
     clf_folder_path = os.path.join(os.path.dirname(os.getcwd()), "model")
-    clf_file_path = os.path.join(clf_folder_path, 'classifier.pkl')
+    clf_file_path = os.path.join(clf_folder_path, 'classifier1.pkl')
     # Load the saved pipeline
     with open(clf_file_path, 'rb') as file:
         loaded_pipeline = pickle.load(file)
@@ -61,8 +63,7 @@ def get_github_files(access_token, query, output_file_path):
     per_page = 100  # Number of results per page
     page = 1  # starting page number
     count = 0
-    
-    
+
     # Get the start and end dates from the user (YYYY-MM-DD)
     start_date = input("Enter start year (YYYY-MM-DD): ")
     end_date = input("Enter end year (YYYY-MM-DD): ")
@@ -84,7 +85,7 @@ def get_github_files(access_token, query, output_file_path):
     if current_date > end_date:
         print("Error: Invalid start date and end date!")
         return
-        
+
     date_range_of_data_collected = {
         "start_date": start_date,
         "end_date": datetime.strftime(end_date, "%Y-%m-%d"),
@@ -108,10 +109,7 @@ def get_github_files(access_token, query, output_file_path):
 
         # Construct the URL with the date range
         created_date_range = f'{start_month}..{end_month}'
-<<<<<<< HEAD
-=======
 
->>>>>>> feature/Deep-Learning
         url = f"https://api.github.com/search/repositories?q={query}+" \
               f"created:{created_date_range}&" \
               f"per_page={per_page}&" \
@@ -183,8 +181,8 @@ def get_github_files(access_token, query, output_file_path):
 
 def main():
     access_token = get_access_token()
-    query = "language:GAP"    
-    
+    query = "language:GAP"
+
     # Specify the output folder path
     output_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
     os.makedirs(output_folder, exist_ok=True)  # Create the output folder if it doesn't exist
@@ -193,9 +191,10 @@ def main():
     output_file_path = get_unique_file_path(output_folder, base_filename)
 
     date_range_of_data_collected = get_github_files(access_token, query, output_file_path)
-    
+
     date_column_names = ['start_date', 'end_date', 'current_date']
-    date_values_for_first_row = [date_range_of_data_collected['start_date'], date_range_of_data_collected['end_date'], date_range_of_data_collected['current_date']]
+    date_values_for_first_row = [date_range_of_data_collected['start_date'], date_range_of_data_collected['end_date'],
+                                 date_range_of_data_collected['current_date']]
 
     # Read the existing content
     existing_content = []
@@ -215,10 +214,8 @@ def main():
     with open(output_file_path, 'w', newline='') as csv_out:
         writer = csv.writer(csv_out)
         writer.writerows(existing_content)
-    
+
     print(f"Classified data saved to {output_file_path}.")
-    
-    
 
 
 if __name__ == "__main__":

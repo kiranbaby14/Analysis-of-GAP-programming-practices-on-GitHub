@@ -10,6 +10,7 @@ from geopy.geocoders import Nominatim
 import pycountry
 
 import sys
+
 sys.path.append("..")
 
 from utils.config import get_access_token
@@ -17,7 +18,6 @@ from utils.constants import HTTP_STATUS_CODES
 from utils.constants import US_COUNTY_CODES
 from utils.constants import US_COUNTRY_NAME
 import re
-
 
 repository_set = set()
 username_set = set()
@@ -49,8 +49,8 @@ def get_user_location(username, access_token):
                 # Get the location field from user details
                 user_location = user_details.get('location', None)
                 location = user_details.get('location', None)
-                
-                if user_location:                
+
+                if user_location:
                     # Clean the user_location by removing leading and trailing whitespace
                     user_location = user_location.strip()
                     # Check if the user_location matches a valid US Two-Letter State Abbreviation
@@ -59,11 +59,10 @@ def get_user_location(username, access_token):
                             return US_COUNTRY_NAME
 
                     # Check if the user_location appears as a whole word (not as part of other words)
-                    for county_shortcut, county_name in US_COUNTY_CODES.items():                        
+                    for county_shortcut, county_name in US_COUNTY_CODES.items():
                         pattern = r"(\s|,|^)" + county_shortcut + r"(,|\s|$)"
                         if re.search(pattern, user_location, re.IGNORECASE):
                             return US_COUNTRY_NAME
-                    
 
                     # Use Nominatim from geopy to geocode the location string and get detailed information
                     geolocator = Nominatim(user_agent="getCountry")
@@ -75,10 +74,10 @@ def get_user_location(username, access_token):
                     else:
                         # Return None if the location is not found by the geocoder
                         return None
-                
+
                 # Return None if the user_location is not available
                 return None
-                
+
             elif response.status_code in [HTTP_STATUS_CODES["FORBIDDEN"], HTTP_STATUS_CODES["TOO_MANY_REQUESTS"]]:
                 print("\nRate limit exceeded (Wait for a few minutes...!)\n")
                 time.sleep(300)  # Wait for 5 minutes (300 seconds)
@@ -88,7 +87,7 @@ def get_user_location(username, access_token):
                 # Handle other status codes or errors as needed
                 print(f"Unexpected status code: {response.status_code}")
                 break  # Break out of the loop if unexpected status code
-                    
+
         except KeyboardInterrupt:
             print("Execution interrupted by user.")
             break
@@ -139,7 +138,7 @@ def fetch_contributors_data(repo_full_name, access_token, username_set):
 
                 # Return the list of dictionaries containing contributors' data
                 return contributors_data
-                
+
             elif response.status_code in [HTTP_STATUS_CODES["FORBIDDEN"], HTTP_STATUS_CODES["TOO_MANY_REQUESTS"]]:
                 print("\nRate limit exceeded (Wait for a few minutes...!)\n")
                 time.sleep(300)  # Wait for 5 minutes (300 seconds)
@@ -149,7 +148,7 @@ def fetch_contributors_data(repo_full_name, access_token, username_set):
                 # Handle other status codes or errors as needed
                 print(f"Unexpected status code: {response.status_code}")
                 break  # Break out of the loop if unexpected status code
-                
+
         except KeyboardInterrupt:
             print("Execution interrupted by user.")
             break
@@ -159,6 +158,7 @@ def fetch_contributors_data(repo_full_name, access_token, username_set):
 
     # If the request is not successful, return an empty list
     return []
+
 
 def fetch_activity_data(repo_full_name, access_token):
     """
@@ -172,7 +172,6 @@ def fetch_activity_data(repo_full_name, access_token):
         list of dicts: A list containing commit details including the year, repository name, owner, commits per year,
         issues per year, and pull requests per year.
     """
-
 
     # Fetch activity data for commits, issues, and pull requests per year
     commits_per_year = fetch_activity_per_year(repo_full_name, access_token, 'commits')
@@ -202,6 +201,7 @@ def fetch_activity_data(repo_full_name, access_token):
     # Return the list of dictionaries containing commits, issues, and pull requests count for each year
     return commits_info
 
+
 def fetch_activity_per_year(repo_full_name, access_token, activity_type):
     """
     Fetches activity data per year for a specific type (e.g., commits, issues, or pull requests) in a GitHub repository.
@@ -225,7 +225,7 @@ def fetch_activity_per_year(repo_full_name, access_token, activity_type):
         try:
             # Send HTTP GET request to fetch activity data for the specified type
             response = requests.get(url, headers=headers, params={'state': 'all'})
-            
+
             if response.status_code == HTTP_STATUS_CODES["SUCCESS"]:
                 # Extract activity data from the response JSON
                 activity_data = response.json()
@@ -241,7 +241,7 @@ def fetch_activity_per_year(repo_full_name, access_token, activity_type):
 
                 # Return the activity data per year as a dictionary
                 return activity_per_year
-                
+
             elif response.status_code in [HTTP_STATUS_CODES["FORBIDDEN"], HTTP_STATUS_CODES["TOO_MANY_REQUESTS"]]:
                 print("\nRate limit exceeded (Wait for a few minutes...!)\n")
                 time.sleep(300)  # Wait for 5 minutes (300 seconds)
@@ -251,7 +251,7 @@ def fetch_activity_per_year(repo_full_name, access_token, activity_type):
                 # Handle other status codes or errors as needed
                 print(f"Unexpected status code: {response.status_code}")
                 break  # Break out of the loop if unexpected status code
-                
+
         except KeyboardInterrupt:
             print("Execution interrupted by user.")
             break
@@ -262,7 +262,7 @@ def fetch_activity_per_year(repo_full_name, access_token, activity_type):
     # If the request is not successful, return an empty dictionary
     return {}
 
-    
+
 def get_repository_details(repo_full_name, access_token):
     """
     Fetches details of a GitHub repository.
@@ -297,13 +297,13 @@ def get_repository_details(repo_full_name, access_token):
 
                 # Get the number of contributors and their locations
                 contributors_data = fetch_contributors_data(repo_full_name, access_token, username_set)
-                
+
                 # Get commit details
                 commits_info = fetch_activity_data(repo_full_name, access_token)
 
                 # Return the repository details as a tuple
                 return repo_created_at, len(contributors_data), repo_owner, contributors_data, commits_info
-                
+
             elif response.status_code in [HTTP_STATUS_CODES["FORBIDDEN"], HTTP_STATUS_CODES["TOO_MANY_REQUESTS"]]:
                 print("\nRate limit exceeded (Wait for a few minutes...!)\n")
                 time.sleep(300)  # Wait for 5 minutes (300 seconds)
@@ -313,7 +313,7 @@ def get_repository_details(repo_full_name, access_token):
                 # Handle other status codes or errors as needed
                 print(f"Unexpected status code: {response.status_code}")
                 break  # Break out of the loop if unexpected status code
-                
+
         except KeyboardInterrupt:
             print("Execution interrupted by user.")
             break
@@ -322,14 +322,14 @@ def get_repository_details(repo_full_name, access_token):
             break
 
     # If the request is not successful, return None values
-    return None, None, None, [], [] 
-        
+    return None, None, None, [], []
+
 
 def main():
     """
     Main function to extract data from GitHub repositories based on URLs in a CSV file and save the results in separate CSV files.
     """
-    
+
     # Get the GitHub access token
     access_token = get_access_token()  # Function call to get the GitHub access token
     data_file_path = '../data/real_GAP_files1.csv'
@@ -340,21 +340,21 @@ def main():
     start_date = ''
     end_date = ''
     current_date = ''
-    
+
     # List to store commit details
-    commits_details = []    
-    
+    commits_details = []
+
     with open(data_file_path, 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
-        
+
         # Read the first row for dates
         first_row = next(csv_reader, None)
-        
+
         if first_row is not None:
             start_date = first_row.get('start_date')
             end_date = first_row.get('end_date')
             current_date = first_row.get('current_date')
-            
+
     # Save the dates to a pickle file
     output_file_path = '../data/dates.pkl'
 
@@ -366,27 +366,29 @@ def main():
 
     with open(output_file_path, 'wb') as output_file:
         pickle.dump(dates_data, output_file)
-    
+
     # Read the URLs from the input CSV file
     with open(data_file_path, 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
-            url = row['URL']  
-            
+            url = row['URL']
+
             # Parse the URL to extract repository details
             parsed_url = urlparse(url)
             path_parts = parsed_url.path.split('/')
             owner = path_parts[1]
             repository_name = path_parts[2]
-            repository_path = owner+'/'+repository_name
-            
+            repository_path = owner + '/' + repository_name
+
             # Check if the repository has already been processed to avoid duplicates
             if repository_path not in repository_set:
-                repository_set.add(repository_path)  # Adding the repository path to the set to track processed repositories
+                repository_set.add(
+                    repository_path)  # Adding the repository path to the set to track processed repositories
                 print("Extracting data from ", repository_path)
 
                 # Get details of the repository, contributors, and commits using GitHub API
-                repo_created_at, num_contributors, repo_owner, contributors_data, commits_info = get_repository_details(repository_path, access_token)
+                repo_created_at, num_contributors, repo_owner, contributors_data, commits_info = get_repository_details(
+                    repository_path, access_token)
 
                 # If the repository details are successfully retrieved
                 if repo_created_at:
@@ -426,8 +428,9 @@ def main():
         writer = csv.DictWriter(csvfile, fieldnames=fields_commits)
         writer.writeheader()
         writer.writerows(commits_details)
-        
+
     print("Successfully completed.")
+
 
 if __name__ == "__main__":
     main()
