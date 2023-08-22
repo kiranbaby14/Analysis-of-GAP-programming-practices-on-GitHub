@@ -4,7 +4,7 @@ This repository comprises code for identifying repositories that uses GAP progra
 ![dissertation](https://github.com/kiranbaby14/Analysis-of-GAP-programming-practices-on-GitHub/assets/50899339/ed49e834-c712-4800-ad36-5cc859c709c2)
 
 
-## Functionalities to be Implemented (change this on the go)
+## Functionalities Implemented 
 - Scrape code files from GitHub 
 - Preprocess the data for carrying out various techniques on them
 - Come up with an ML approach to do distinguish whether a file belongs to GAP programming language
