@@ -46,8 +46,10 @@ def retrieve_matching_files(language_name, repo, extensions, directory, pipeline
                         if classified_language[0] == "GAP":
                             # print(classified_language, file_URL)
                             matching_files.append({"URL": file_URL, "Name": language_name})
+                            return matching_files
                     else:
                         matching_files.append({"URL": file_URL, "Name": language_name})
+                        
             except Exception:
                 # print("URL: " + file_URL + ", File: " + content)
                 continue
@@ -60,7 +62,8 @@ def retrieve_matching_files(language_name, repo, extensions, directory, pipeline
         # of the loading_animation string
         sys.stdout.write("\b" * len(loading_animation))
         sys.stdout.flush()
-        time.sleep(0.1)  # for smooth visual effects of the animation
+        #time.sleep(0.1)  # for smooth visual effects of the animation
+
 
     return matching_files
 
