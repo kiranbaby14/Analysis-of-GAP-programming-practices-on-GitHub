@@ -160,7 +160,7 @@ def get_github_files(access_token, query, output_file_path):
             # Save repositories with matching files
             if matching_files:
                 # ----------code to save repo here----------------
-                print("Real: " + repo_name + ", Date: " + start_month)
+                print("Real: " + repo_name)
                 count += 1
                 field_names = list(matching_files[0].keys())
                 save_to_csv_file(output_file_path, field_names, matching_files)
@@ -196,26 +196,33 @@ def main():
     date_values_for_first_row = [date_range_of_data_collected['start_date'], date_range_of_data_collected['end_date'],
                                  date_range_of_data_collected['current_date']]
 
-    # Read the existing content
-    existing_content = []
-    with open(output_file_path, 'r') as csv_in:
-        reader = csv.reader(csv_in)
-        existing_content = list(reader)
+    # Check if the file exists before trying to read it
+    if os.path.exists(output_file_path):
+    
+        # Read the existing content
+        existing_content = []
+        with open(output_file_path, 'r') as csv_in:
+            reader = csv.reader(csv_in)
+            existing_content = list(reader)
 
-    # Modify the header
-    header = existing_content[0]
-    header.extend(date_column_names)
+        # Modify the header
+        header = existing_content[0]
+        header.extend(date_column_names)
 
-    # Modify the first row
-    first_row = existing_content[1]
-    first_row.extend(date_values_for_first_row)
+        # Modify the first row
+        first_row = existing_content[1]
+        first_row.extend(date_values_for_first_row)
 
-    # Write the updated content back to the file
-    with open(output_file_path, 'w', newline='') as csv_out:
-        writer = csv.writer(csv_out)
-        writer.writerows(existing_content)
+        # Write the updated content back to the file
+        with open(output_file_path, 'w', newline='') as csv_out:
+            writer = csv.writer(csv_out)
+            writer.writerows(existing_content)
 
-    print(f"Classified data saved to {output_file_path}.")
+        print(f"Classified data saved to {output_file_path}.")
+        
+    else:
+        print("No CSV file was created as no matching repositories were found.")
+
 
 
 if __name__ == "__main__":

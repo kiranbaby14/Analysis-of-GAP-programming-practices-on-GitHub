@@ -332,7 +332,7 @@ def main():
 
     # Get the GitHub access token
     access_token = get_access_token()  # Function call to get the GitHub access token
-    data_file_path = '../data/real_GAP_files1.csv'
+    data_file_path = '../data/gap_files.csv'
 
     # List to store repository details
     repository_details = []
