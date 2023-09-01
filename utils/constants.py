@@ -31,6 +31,14 @@ LANGUAGE_DATA = {
     "RUBY": {
         "extensions": [".rb"],
         "repository": ["repository_names"]
+    },
+    "G-CODE": {
+		"extensions": [".gcode"],
+		"repository": ["repository_names"]
+    },
+    "GDSCRIPT": {
+		"extensions": [".gd"],
+		"repository": ["repository_names"]
     }
 
     # Add more language entries as needed

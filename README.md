@@ -1,23 +1,25 @@
 # Classification-and-Analysis-of-GAP-Files-on-GitHub-using-AI
 This repository comprises code for identifying repositories that uses GAP programming language, using a combination of machine learning, NLP and deep learning techniques. Additionally, it facilitates conducting comprehensive analysis on the collected data, enabling insightful observations.
 
-![dissertation](https://github.com/kiranbaby14/Analysis-of-GAP-programming-practices-on-GitHub/assets/50899339/ed49e834-c712-4800-ad36-5cc859c709c2)
+![overview](https://github.com/kiranbaby14/Analysis-of-GAP-programming-practices-on-GitHub/assets/50899339/759799a3-9fab-4bbd-b96f-912b898a740a)
 
 
-## Functionalities to be Implemented (change this on the go)
-- Scrape code files from GitHub 
+## Functionalities Implemented 
+- Retrieve repostiories raw file link from GitHub 
 - Preprocess the data for carrying out various techniques on them
-- Come up with an ML approach to do distinguish whether a file belongs to GAP programming language
+- Come up with an ML/DL approach to do distinguish whether a file belongs to GAP programming language
 - Experiment with different models using ML, NLP and Deep Learning techniques
 - Compare the performance of the models
-- Perform insightful analysis on the filtered code files
+- Perform insightful analysis on the filtered reprostories
 
 ## Getting Started
+We kept the scripts sepeartely from the notebooks and have given different requirements.txt to each
+### Running Python Scripts  
 #### Install requirements.txt
 ```
 pip install -r requirements.txt
 ```
-#### cd into scripts/ directory
+#### cd into scripts/ directory from the root directory
 ```
 cd scripts/
 ```
@@ -25,6 +27,23 @@ cd scripts/
 ```
 python *script_name.py*
 ```
+
+### Running Jupter Notebooks (ML/DL model and Analysis Part)  
+#### cd into notebooks/ directory from the root directory
+```
+cd notebooks/
+```
+#### Install requirements.txt
+```
+pip install -r requirements.txt
+```
+#### Start the Jupter notebook
+```
+jupyter notebook
+```
+#### Select the notebook you want to run
+#### Run the notebook
+
 
 ## Best Practices 
 - Check the issues section to find what to work on
