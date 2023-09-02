@@ -22,7 +22,6 @@ from transformers.transformers import \
     MultipleSpacesRemovalTransformer
 
 
-
 def validate_date(date_str):
     """
     Function to validate date string
@@ -39,6 +38,11 @@ def validate_date(date_str):
 
 
 def load_pipeline():
+    """
+    Function to load the ML pipeline
+
+    :return: ML pipeline
+    """
     # Load the saved pipeline
     clf_folder_path = os.path.join(os.path.dirname(os.getcwd()), "model")
     clf_file_path = os.path.join(clf_folder_path, 'classifier1.pkl')
@@ -198,7 +202,7 @@ def main():
 
     # Check if the file exists before trying to read it
     if os.path.exists(output_file_path):
-    
+
         # Read the existing content
         existing_content = []
         with open(output_file_path, 'r') as csv_in:
@@ -219,10 +223,9 @@ def main():
             writer.writerows(existing_content)
 
         print(f"Classified data saved to {output_file_path}.")
-        
+
     else:
         print("No CSV file was created as no matching repositories were found.")
-
 
 
 if __name__ == "__main__":
