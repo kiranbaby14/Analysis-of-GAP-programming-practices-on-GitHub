@@ -11,8 +11,12 @@ dist/
 build/
 *.egg-info/
 
-# Virtual environments
+# folder which contains scraped data from GitHub
+data/
+
+# Virtual environments  (ML-GAP-Classification- custom venv)
 venv/
+ML-GAP-Classification/
 env/
 *.env
 
