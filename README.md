@@ -1,7 +1,7 @@
 # Classification-and-Analysis-of-GAP-Files-on-GitHub-using-AI
 This repository comprises code for identifying repositories that uses GAP programming language, using a combination of machine learning, NLP and deep learning techniques. Additionally, it facilitates conducting comprehensive analysis on the collected data, enabling insightful observations.
 
-![overview](https://github.com/kiranbaby14/Analysis-of-GAP-programming-practices-on-GitHub/assets/50899339/759799a3-9fab-4bbd-b96f-912b898a740a)
+![overview](https://github.com/kiranbaby14/Analysis-of-GAP-programming-practices-on-GitHub/assets/50899339/430f157b-fcd2-46f5-8b73-573b5dd79fb7)
 
 
 ## Functionalities Implemented 
